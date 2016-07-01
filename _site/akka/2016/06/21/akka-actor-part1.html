@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="shortcut icon" href="/static/img/favicon.ico" />
+        <title>初探Akka Actor - Arthur</title>
+        <meta name="author" content="Arthur Wu" />
+        <meta name="description" content="初探Akka Actor" />
+        <meta name="keywords" content="初探Akka Actor, Arthur, akka" />
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.xml">
+
+        <meta content="1749788565247320" property="fb:app_id">
+        <meta content="Arthur" property="og:site_name">
+        
+          <meta content="初探Akka Actor" property="og:title">
+        
+        
+          <meta content="article" property="og:type">
+        
+        
+          <meta content="" property="og:description">
+        
+        
+          <meta content="https://jiujye.github.io/blog/akka/2016/06/21/akka-actor-part1.html" property="og:url">
+        
+        
+          <meta content="2016-06-21T04:43:45+08:00" property="article:published_time">
+          <meta content="https://jiujye.github.io/blog/about/" property="article:author">
+        
+        
+          <meta content="https://jiujye.github.io/blog/static/img/logo-high-resolution.png" property="og:image">
+        
+        
+          
+          <meta content="akka" property="article:section">
+          
+        
+        
+          
+        
+
+        <meta name="twitter:card" content="summary">
+        <meta name="twitter:site" content="@agusmakmun6">
+        <meta name="twitter:creator" content="@agusmakmun6">
+        
+          <meta name="twitter:title" content="初探Akka Actor">
+        
+        
+          <meta name="twitter:url" content="https://jiujye.github.io/blog/akka/2016/06/21/akka-actor-part1.html">
+        
+        
+          <meta name="twitter:description" content="">
+        
+        
+
+        <!-- Font awesome icons -->
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/static/css/syntax.css">
+
+        <!-- Bootstrap core CSS -->
+        <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Fonts -->
+        <link href="//fonts.googleapis.com/css?family=Roboto+Condensed:400,300italic,300,400italic,700&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+        <!-- Custom CSS -->        
+        <link rel="stylesheet" href="/static/css/super-search.css">
+        <link rel="stylesheet" href="/static/css/thickbox.css">
+        <link rel="stylesheet" href="/static/css/projects.css">
+        <link rel="stylesheet" href="/static/css/main.css">
+
+        <!-- Google Analytics -->
+        <script>
+          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+          })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+          
+          ga('create', '', 'auto');
+          ga('send', 'pageview');
+        </script>
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="col-sm-2">
+              <div class="fixed-condition">
+                <!--<a href="/"><img id="about" src="/static/img/avatar.jpg" height="75px" width="75px" /></a>-->
+                <h1 class="author-name">Arthur Wu</h1>
+                
+
+   		<!--
+		<div class="social">
+                    <ul>
+                        
+                            <li><a href="#" target="_blank"><i class="fa fa-facebook"></i></a></li>
+                        
+                            <li><a href="#" target="_blank"><i class="fa fa-skype"></i></a></li>
+                        
+                            <li><a href="https://twitter.com/agusmakmun6" target="_blank"><i class="fa fa-twitter"></i></a></li>
+                        
+                            <li><a href="#" target="_blank"><i class="fa fa-linkedin"></i></a></li>
+                        
+                            <li><a href="#" target="_blank"><i class="fa fa-stack-exchange"></i></a></li>
+                        
+                    </ul>
+                </div>
+
+                <div class="search" id="js-search">
+                  <input type="text" placeholder="(sitemap)~$ type to search" class="search__input form-control" id="js-search__input">
+                  <ul class="search__results" id="js-search__results"></ul>
+                </div>             
+		-->
+
+
+                <hr  />
+
+                <!--<strong>Navigation</strong><br />-->
+                    &nbsp;&raquo; <a href="/">Home</a> <br />
+                
+                    &nbsp;&raquo; <a class="about" href="/category/akka">Articles</a><br />
+                
+                    &nbsp;&raquo; <a class="about" href="https://github.com/jiujye">Github</a><br />
+                
+              </div><!-- end /.fixed-condition -->
+
+            </div>
+
+            <div class="col-sm-9 col-offset-1">
+                <h1>初探Akka Actor</h1>
+<span class="time">21 Jun 2016</span>
+
+<span class="categories">
+    &raquo; <a href="/category/akka">akka</a>
+</span>
+
+
+<div class="content">
+    <div class="post"><p>自從CPU從單核心發展到多核心，核心數演進飛快，從最早的雙核心發展至目前Intel提供給超級電腦使用的Xeon Phi系列61核心
+或是一般伺服器版本的24核心，然而CPU每顆核心的時脈速度卻沒有顯著的成長。對於軟體設計人員而言，已經無法單純再靠CPU時脈
+速度的成長來增進軟體的速度；我們該如何在這樣的環境中增進軟體的效能？這時Concurrency(並行)或是Parallelism(平行)的設計方式便為我們可以採取的一種手段。</p>
+
+<!--more-->
+<p><br />
+關於Concurrency的定義有多種解釋的方式，在此利用Google工程師Rob Pike(Go語言的設計者)平易近人的說明方式，
+Pike認為Concurrency是同時處理(dealing with)很多事情，不同於Parallelism(平行)是同時做(doing)很多件事情。
+也就是說Concurrency強調的是同時處理很多事情的結構而非同時執行這些事情。</p>
+
+<p><br />
+傳統的Concurrency設計方式是以Thread為基礎，透過share state來溝通。
+諸多程式語言皆是採用此種方式，像是C++、Java、C#、Python…等
+。此方式為了確保正確地讀取寫入資料，因此利用了Lock機制，
+然而這種設計遭遇了不少問題，例如：race condition、dead lock…等，
+需要小心翼翼的設計與測試，發生的bug也有不容易重現的問題。
+不少專業人士都特別針對Thread-based的Concurrency設計方式出專書介紹。</p>
+
+<p><br />
+由於傳統的方式在實作上相當的辛苦，大家開始從不同角度來思考，是否不要再透過share state來溝通。
+像是Go語言以及Akka便是採用不同於傳統主流的Concurrent運算理論來實現。<br />
+<br />
+<br />
+<strong>Akka</strong><br /></p>
+
+<p>以Akka為例，Akka為一open source工具(http://akka.io/)，
+主要在幫我們更容易建置concurrent與distributed(分散)的應用程式，而Akka採用Actor Model為其核心
+(Actor Model為Concurrent運算當中的一種理論)。過去提到Actor馬上直接想到的工具，便是Erlang
+(Facebook曾使用Erlang打造他的聊天室系統來服務兩億位活躍使用者)。不過現在我們有了新的選擇，
+Akka是利用JVM語言來實現，同時提供Java與Scala的api，而.Net的Open Source社群也實現.Net版的Akka。</p>
+
+<p><br />
+在Akka Actor中Actor為基本單元，也就是說我們主要專注於設計實現符合我們需求的Acotr；s就同如物件導向語言，
+我們專注於設計各式各樣的類別。Actor主要的特色為(以下使用原文來解釋會更容易理解)：</p>
+
+<ul>
+  <li>Isolated lightweight event-based processes</li>
+  <li>Share nothing</li>
+  <li>Communicate through async messages</li>
+  <li>Each actor has a mailbox (message queue)</li>
+  <li>Location transparent (distributable)</li>
+  <li>Supervision-based failure management
+<br />
+<strong>Refference:</strong> <a href="http://www.slideshare.net/bantonsson/real-world-akka-actor-recipes-javaone-2013">Björn Antonsson</a><br /></li>
+</ul>
+
+<p><br />
+簡單的來看Acotr彼此是獨立個體，透過事件來驅動，互不分享內部資訊，只利用訊息來溝通。</p>
+
+<p><br />
+在真實世界中的裡充滿了Concurrency例子，譬如像是星巴克或50嵐，前台的接單人員不斷接受客戶的訂單，
+而後方多個工作人員不斷同時在處理多張不同的訂單。</p>
+
+<p><br />
+以下將使用Akka Actor所提供的Java api來模擬有五個客戶向咖啡店員點單，
+而接單人員將會把訂單分派給其他專門製作咖啡的店員來製作，</p>
+
+<p><br />
+<strong>設計Actor</strong><br /></p>
+
+<p>首先需要設計兩個Actor分別為Customer與CoffeeShopWorker，
+Actor的實現需要透過繼承<code class="highlighter-rouge">UntypedActor</code>並override <code class="highlighter-rouge">onReceive</code>方法，
+我們所需要完成的邏輯將寫在<code class="highlighter-rouge">onReceive</code>方法中，實現方式如下<br /><br /></p>
+
+<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="n">public</span> <span class="k">class</span> <span class="nc">CoffeeShopWorker</span> <span class="k">extends</span> <span class="nc">UntypedActor</span> <span class="o">{</span>
+    <span class="nd">@Override</span>
+    <span class="n">public</span> <span class="n">void</span> <span class="n">onReceive</span><span class="o">(</span><span class="nc">Object</span> <span class="n">msg</span><span class="o">)</span> <span class="o">{</span>
+          <span class="err">…</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre>
+</div>
+
+<p><br />
+假設每個CoffeeShopWorker皆能處理訂單與製作咖啡，因此在<code class="highlighter-rouge">onReceive</code>方法中，
+當其收到<code class="highlighter-rouge">OrderRequest</code>的訊息時，將會把訂單收據發送給客戶，
+並轉發製作咖啡指令給其他製作咖啡的店員。然而當收到<code class="highlighter-rouge">MakeCoffee</code>的訊息時，
+製作咖啡並把做好的咖發交付客戶。<br /><br /></p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="nd">@Override</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">onReceive</span><span class="o">(</span><span class="n">Object</span> <span class="n">msg</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">msg</span> <span class="k">instanceof</span> <span class="n">OrderRequest</span> <span class="o">)</span> <span class="o">{</span>  <span class="c1">//收到OrderRequest</span>
+        <span class="n">OrderRequest</span> <span class="n">req</span> <span class="o">=</span> <span class="o">(</span><span class="n">OrderRequest</span><span class="o">)</span><span class="n">msg</span><span class="o">;</span>
+        <span class="n">sender</span><span class="o">().</span><span class="na">tell</span><span class="o">(</span><span class="k">new</span> <span class="n">Receipt</span><span class="o">(),</span><span class="n">ActorRef</span><span class="o">.</span><span class="na">noSender</span><span class="o">());</span> <span class="c1">//給客戶收據</span>
+            <span class="n">getContext</span><span class="o">().</span><span class="na">actorSelection</span><span class="o">(</span><span class="err">"</span><span class="o">/</span><span class="n">user</span><span class="o">/</span><span class="n">workerRouter</span><span class="err">”</span><span class="o">)</span> <span class="c1">//請其他店員製作咖啡</span>
+                              <span class="o">.</span><span class="na">tell</span><span class="o">(</span><span class="k">new</span> <span class="n">MakeCoffee</span><span class="o">(</span><span class="n">req</span><span class="o">.</span><span class="na">getRequest</span><span class="o">(),</span><span class="n">sender</span><span class="o">().</span><span class="na">path</span><span class="o">().</span><span class="na">toString</span><span class="o">()),</span> 
+					<span class="n">ActorRef</span><span class="o">.</span><span class="na">noSender</span><span class="o">());</span>
+        <span class="o">}</span><span class="k">else</span> <span class="k">if</span><span class="o">(</span><span class="n">msg</span> <span class="k">instanceof</span>  <span class="n">MakeCoffee</span><span class="o">){</span> <span class="c1">//收到MakeCoffee</span>
+            <span class="n">MakeCoffee</span>  <span class="n">mc</span> <span class="o">=</span> <span class="o">(</span><span class="n">MakeCoffee</span><span class="o">)</span><span class="n">msg</span><span class="o">;</span>
+            <span class="n">getContext</span><span class="o">().</span><span class="na">actorSelection</span><span class="o">(</span><span class="n">mc</span><span class="o">.</span><span class="na">getCustomerPath</span><span class="o">())</span> <span class="c1">//製作咖啡並交付給該客戶</span>
+                    <span class="o">.</span><span class="na">tell</span><span class="o">(</span><span class="k">new</span> <span class="n">Coffee</span><span class="o">(</span><span class="n">mc</span><span class="o">.</span><span class="na">getCoffee</span><span class="o">()),</span> <span class="n">ActorRef</span><span class="o">.</span><span class="na">noSender</span><span class="o">());</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre>
+</div>
+
+<p><br />
+在Customer Actor的<code class="highlighter-rouge">onReceive</code>方法中，主要負責處理買咖啡，取得收據及咖啡。<br /><br /></p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="nd">@Override</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">onReceive</span><span class="o">(</span><span class="n">Object</span> <span class="n">msg</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">msg</span> <span class="k">instanceof</span> <span class="n">BuyCoffee</span><span class="o">)</span> <span class="o">{</span> <span class="c1">//買咖啡</span>
+        <span class="n">BuyCoffee</span> <span class="n">bc</span> <span class="o">=</span> <span class="o">(</span><span class="n">BuyCoffee</span><span class="o">)</span><span class="n">msg</span><span class="o">;</span>
+        <span class="c1">//向櫃檯點單</span>
+        <span class="n">getContext</span><span class="o">().</span><span class="na">actorSelection</span><span class="o">(</span><span class="s">"/user/Counter"</span><span class="o">).</span><span class="na">tell</span><span class="o">(</span> <span class="k">new</span> <span class="n">OrderRequest</span><span class="o">(</span><span class="n">bc</span><span class="o">.</span><span class="na">getName</span><span class="o">()),</span> <span class="n">getSelf</span><span class="o">());</span> 
+    <span class="o">}</span><span class="k">else</span> <span class="k">if</span><span class="o">(</span><span class="n">msg</span> <span class="k">instanceof</span> <span class="n">Receipt</span><span class="o">){</span><span class="c1">//取得收據</span>
+        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">self</span><span class="o">().</span><span class="na">path</span><span class="o">().</span><span class="na">name</span><span class="o">()</span> <span class="o">+</span><span class="s">" get "</span><span class="o">+((</span><span class="n">Receipt</span><span class="o">)</span><span class="n">msg</span><span class="o">).</span><span class="na">getInfo</span><span class="o">());</span>
+    <span class="o">}</span><span class="k">else</span> <span class="k">if</span><span class="o">(</span><span class="n">msg</span> <span class="k">instanceof</span> <span class="n">Coffee</span><span class="o">){</span><span class="c1">//取得咖啡</span>
+        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span> <span class="n">self</span><span class="o">().</span><span class="na">path</span><span class="o">().</span><span class="na">name</span><span class="o">()</span> <span class="o">+</span><span class="s">" get "</span><span class="o">+((</span><span class="n">Coffee</span><span class="o">)</span><span class="n">msg</span><span class="o">).</span><span class="na">getName</span><span class="o">());</span>
+<span class="o">}</span>
+
+</code></pre>
+</div>
+
+<p><br />
+此外我們可以覆寫Customer Actor的<code class="highlighter-rouge">preStart</code>方法在其中設定timer讓Customer Actor會自動買咖啡。<br /><br /></p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="nd">@Override</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">preStart</span><span class="o">()</span> <span class="o">{</span>
+    <span class="n">getContext</span><span class="o">().</span><span class="na">system</span><span class="o">().</span><span class="na">scheduler</span><span class="o">().</span><span class="na">scheduleOnce</span><span class="o">(</span>
+            <span class="n">Duration</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="mi">500</span><span class="o">,</span> <span class="n">TimeUnit</span><span class="o">.</span><span class="na">MILLISECONDS</span><span class="o">),</span>
+            <span class="n">getSelf</span><span class="o">(),</span> <span class="k">new</span> <span class="n">BuyCoffee</span><span class="o">(</span><span class="k">this</span><span class="o">.</span><span class="na">coffee</span><span class="o">),</span> <span class="n">getContext</span><span class="o">().</span><span class="na">dispatcher</span><span class="o">(),</span> <span class="kc">null</span><span class="o">);</span>
+<span class="o">}</span>
+
+</code></pre>
+</div>
+
+<p><br />
+<strong>建立Actor</strong><br /></p>
+
+<p>主要的邏輯設計完成後，我們該如何建立Actor讓其運作。
+首先我們需要建立Actor System。<br /><br /></p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="n">ActorSystem</span> <span class="n">system</span> <span class="o">=</span> <span class="n">ActorSystem</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="err">"</span><span class="n">CoffeeShop</span><span class="err">”</span><span class="o">);</span>
+</code></pre>
+</div>
+
+<p><br />
+接著利用system的<code class="highlighter-rouge">actorOf</code>來建立Actor，當中需要的參數為Acotr的設定物件<code class="highlighter-rouge">Props</code>，以及Actor名稱。
+在建立Actor時，我們可以獲得<code class="highlighter-rouge">ActorRef</code>，這是Actor的參考，因為我們不能直接操作Actor實體，
+所有的操作都只能透過<code class="highlighter-rouge">ActorRef</code>，Actor實體是各自獨立受到保護的。<br /><br /></p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="n">ActorRef</span> <span class="n">counter</span> <span class="o">=</span> <span class="n">system</span><span class="o">.</span><span class="na">actorOf</span><span class="o">(</span><span class="n">CoffeeShopWorker</span><span class="o">.</span><span class="na">props</span><span class="o">(),</span><span class="err">"</span><span class="n">Counter</span><span class="err">”</span><span class="o">);</span>  <span class="c1">//建立前台接單人員</span>
+</code></pre>
+</div>
+
+<p><br />
+此外在這個例子中我們還利用了<code class="highlighter-rouge">Router</code>的功能，建立三個咖啡製作人員，
+透過<code class="highlighter-rouge">Router</code>使用<code class="highlighter-rouge">RoundRobin</code>的方式來分派製作咖啡指令。<br /><br /></p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="n">system</span><span class="o">.</span><span class="na">actorOf</span><span class="o">(</span><span class="k">new</span> <span class="n">RoundRobinPool</span><span class="o">(</span><span class="mi">3</span><span class="o">).</span><span class="na">props</span><span class="o">(</span><span class="n">CoffeeShopWorker</span><span class="o">.</span><span class="na">props</span><span class="o">()),</span> <span class="s">"workerRouter"</span><span class="o">);</span>
+</code></pre>
+</div>
+
+<p><br />
+<strong>傳送訊息</strong><br /></p>
+
+<p>Actor彼此之間是透過訊息來溝通，所以必須使用ActorRef來傳遞。<code class="highlighter-rouge">ActorRef</code>除來在建立時可以取得，
+也可透過<code class="highlighter-rouge">actorSelection</code>方法來取得，當中所需的參數為Actor的path。<br /><br /></p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="n">getContext</span><span class="o">().</span><span class="na">actorSelection</span><span class="o">(</span><span class="s">"/user/Counter"</span><span class="o">).</span><span class="na">tell</span><span class="o">(</span> <span class="k">new</span> <span class="n">OrderRequest</span><span class="o">(</span><span class="n">bc</span><span class="o">.</span><span class="na">getName</span><span class="o">()),</span> <span class="n">getSelf</span><span class="o">());</span>
+</code></pre>
+</div>
+
+<p><br />
+<strong>執行方式</strong><br /></p>
+
+<p>在main方法中建立一個前台接單人員Actor，三個咖啡製作人員Actor以及五個客戶Actor。
+客戶Actor在啟動前會設定timer自動傳遞買咖啡的指令，向台接單人員購買咖啡。<br /><br /></p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="kd">final</span> <span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">){</span>
+
+    <span class="n">ActorSystem</span> <span class="n">system</span> <span class="o">=</span> <span class="n">ActorSystem</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="s">"CoffeeShop"</span><span class="o">);</span>
+
+    <span class="n">system</span><span class="o">.</span><span class="na">actorOf</span><span class="o">(</span><span class="n">CoffeeShopWorker</span><span class="o">.</span><span class="na">props</span><span class="o">(),</span><span class="s">"Counter"</span><span class="o">);</span>
+    <span class="n">system</span><span class="o">.</span><span class="na">actorOf</span><span class="o">(</span><span class="k">new</span> <span class="n">RoundRobinPool</span><span class="o">(</span><span class="mi">3</span><span class="o">).</span><span class="na">props</span><span class="o">(</span><span class="n">CoffeeShopWorker</span><span class="o">.</span><span class="na">props</span><span class="o">()),</span> <span class="s">"workerRouter"</span><span class="o">);</span>
+
+    <span class="n">system</span><span class="o">.</span><span class="na">actorOf</span><span class="o">(</span><span class="n">Customer</span><span class="o">.</span><span class="na">props</span><span class="o">(</span><span class="s">"Latte"</span><span class="o">),</span><span class="s">"Customer1"</span><span class="o">);</span>
+    <span class="n">system</span><span class="o">.</span><span class="na">actorOf</span><span class="o">(</span><span class="n">Customer</span><span class="o">.</span><span class="na">props</span><span class="o">(</span><span class="s">"Black Coffee"</span><span class="o">),</span><span class="s">"Customer2"</span><span class="o">);</span>
+    <span class="n">system</span><span class="o">.</span><span class="na">actorOf</span><span class="o">(</span><span class="n">Customer</span><span class="o">.</span><span class="na">props</span><span class="o">(</span><span class="s">"Cappuccino"</span><span class="o">),</span><span class="s">"Customer3"</span><span class="o">);</span>
+    <span class="n">system</span><span class="o">.</span><span class="na">actorOf</span><span class="o">(</span><span class="n">Customer</span><span class="o">.</span><span class="na">props</span><span class="o">(</span><span class="s">"Iced Coffee"</span><span class="o">),</span><span class="s">"Customer4"</span><span class="o">);</span>
+    <span class="n">system</span><span class="o">.</span><span class="na">actorOf</span><span class="o">(</span><span class="n">Customer</span><span class="o">.</span><span class="na">props</span><span class="o">(</span><span class="s">"Iced Tea"</span><span class="o">),</span><span class="s">"Customer5"</span><span class="o">);</span>
+
+<span class="o">}</span>
+</code></pre>
+</div>
+
+<p><br />
+<strong>執行結果</strong><br /><br /></p>
+
+<p>利用輸出可以看出，客戶Actor在啟動前透過設定好的timer自動傳遞買咖啡的指令，向台接單人員購買咖啡，
+而三個咖啡製作人員則同時處裡不同客戶的訂單。 不過由於Akka內部Dispatcher配置thread機制的關係，
+我們每次執行的輸出結果的順序會有所不同。<br /><br /></p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>2016-07-01 10:16:29.133 Counter handle Customer2 order.
+2016-07-01 10:16:29.134 Customer2 get Receipt  
+2016-07-01 10:16:29.135 Counter handle Customer5 order.
+2016-07-01 10:16:29.135 Counter handle Customer4 order.
+2016-07-01 10:16:29.136 Worker $b make Iced Tea.
+2016-07-01 10:16:29.136 Customer4 get Receipt  
+2016-07-01 10:16:29.136 Worker $c make Iced Coffee.
+2016-07-01 10:16:29.136 Counter handle Customer1 order.
+2016-07-01 10:16:29.137 Customer1 get Receipt  
+2016-07-01 10:16:29.137 Customer5 get Receipt  
+2016-07-01 10:16:29.137 Customer5 get Iced Tea
+2016-07-01 10:16:29.137 Customer4 get Iced Coffee
+2016-07-01 10:16:29.138 Worker $a make Black Coffee.
+2016-07-01 10:16:29.138 Customer2 get Black Coffee
+2016-07-01 10:16:29.138 Worker $a make Latte.
+2016-07-01 10:16:29.138 Counter handle Customer3 order.
+2016-07-01 10:16:29.138 Customer1 get Latte
+2016-07-01 10:16:29.138 Worker $b make Cappuccino.
+2016-07-01 10:16:29.138 Customer3 get Receipt  
+2016-07-01 10:16:29.138 Customer3 get Cappuccino
+</code></pre>
+</div>
+
+<p><br />
+<strong>結語</strong><br /></p>
+
+<p>藉由這個簡單例子的介紹，我們可以了解Akka Actor主要的特色，與Concurrent Actor Model運作的基本原理。
+但這只是個開頭，許多Akka重要的概念與細節都沒有特別介紹，主要是希望藉由這個開頭讓大家對於Akka產生興趣，
+未來將會有更多關於Akka的介紹。Akka Actor詳細資訊可參考<a href="http://doc.akka.io/docs/akka/current/java/untyped-actors.html">http://doc.akka.io/docs/akka/current/java/untyped-actors.html</a></p>
+</div>
+
+</div>
+
+<!--
+
+
+    
+    
+        
+            
+        
+    
+
+
+-->
+<div class="PageNavigation">
+  
+  
+</div>
+
+<!--
+<div class="disqus-comments">
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* <![CDATA[ */
+
+        var disqus_shortname = "";
+        var disqus_identifier = "https://jiujye.github.io/blog_初探Akka Actor";
+        var disqus_title = "初探Akka Actor";
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    /* ]]> */
+    </script>
+</div>
+-->
+
+
+                <footer>
+                    &copy; Arthur Wu
+                     
+                    - <a href="https://github.com/jiujye">https://github.com/jiujye</a> - Powered by Jekyll.
+                    
+
+                    <div class="btn-github" style="float:right;">
+                        <iframe src="https://ghbtns.com/github-btn.html?user=jiujye&repo=jiujye.github.io&type=star&count=true" frameborder="0" scrolling="0" width="85" height="20px"></iframe>                    
+                        <iframe src="https://ghbtns.com/github-btn.html?user=jiujye&repo=jiujye.github.io&type=fork&count=true" frameborder="0" scrolling="0" width="85" height="20px"></iframe>
+                    </div>
+                </footer>
+            </div><!-- end /.col-sm-8 -->
+        </div><!-- end /.container -->
+
+        <!-- Bootstrap core JavaScript
+        ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+        <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+        <script src="/static/js/bootstrap.min.js"></script>
+        <script src="/static/js/super-search.js"></script>
+        <script src="/static/js/thickbox-compressed.js"></script>
+        <script src="/static/js/projects.js"></script>
+    </body>
+</html>
