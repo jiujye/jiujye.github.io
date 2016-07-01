@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "初探Akka Actor"
-date:   2016-07-01 12:00:45 +0700
+date:   2016-06-30 12:00:45 +0700
 categories: [akka]
 ---
 
