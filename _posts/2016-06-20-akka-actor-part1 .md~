@@ -231,6 +231,3 @@ public static void main(final String[] args){
 藉由這個簡單例子的介紹，我們可以了解Akka Actor主要的特色，與Concurrent Actor Model運作的基本原理。
 但這只是個開頭，許多Akka重要的概念與細節都沒有特別介紹，主要是希望藉由這個開頭讓大家對於Akka產生興趣，
 未來將會有更多關於Akka的介紹。Akka Actor詳細資訊可參考[http://doc.akka.io/docs/akka/current/java/untyped-actors.html](http://doc.akka.io/docs/akka/current/java/untyped-actors.html)
-，上述完整程式碼請見[https://github.com/jiujye/examples/tree/master/akka-actor-example1](https://github.com/jiujye/examples/tree/master/akka-actor-example1)。
-
-
