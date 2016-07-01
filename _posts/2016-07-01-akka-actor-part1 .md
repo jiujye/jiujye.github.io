@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "初探Akka Actor"
-date:   2016-06-21 03:43:45 +0700
+date:   2016-07-01 12:00:45 +0700
 categories: [akka]
 ---
 
@@ -24,7 +24,7 @@ Pike認為Concurrency是同時處理(dealing with)很多事情，不同於Parall
 不少專業人士都特別針對Thread-based的Concurrency設計方式出專書介紹。
 
 <br>
-由於傳統的方式在實作上相當的辛苦，大家開始從不同角度來思考，是否不要再透過share state來溝通。
+由於傳統的方式在實作上相當辛苦，大家開始從不同角度來思考，是否不要再透過share state來溝通。
 像是Go語言以及Akka便是採用不同於傳統主流的Concurrent運算理論來實現。<br>
 <br>
 <br>
@@ -37,8 +37,8 @@ Pike認為Concurrency是同時處理(dealing with)很多事情，不同於Parall
 Akka是利用JVM語言來實現，同時提供Java與Scala的api，而.Net的Open Source社群也實現.Net版的Akka。
 
 <br>
-在Akka Actor中Actor為基本單元，也就是說我們主要專注於設計實現符合我們需求的Acotr；s就同如物件導向語言，
-我們專注於設計各式各樣的類別。Actor主要的特色為(以下使用原文來解釋會更容易理解)：
+在Akka Actor中Actor為基本單元，也就是說我們主要專注於設計實現符合我們需求的Actor；就同如物件導向語言，
+我們專注於設計各式各樣的類別。Actor主要的特色為(以下使用原文來解釋，會更容易理解)：
 
 * Isolated lightweight event-based processes
 * Share nothing
@@ -50,7 +50,7 @@ Akka是利用JVM語言來實現，同時提供Java與Scala的api，而.Net的Ope
 **Refference:** [Björn Antonsson](http://www.slideshare.net/bantonsson/real-world-akka-actor-recipes-javaone-2013)<br>
 
 <br>
-簡單的來看Acotr彼此是獨立個體，透過事件來驅動，互不分享內部資訊，只利用訊息來溝通。
+簡單的來看Actor彼此是獨立個體，透過事件來驅動，互不分享內部資訊，只利用訊息來溝通。
 
 <br>
 在真實世界中的裡充滿了Concurrency例子，譬如像是星巴克或50嵐，前台的接單人員不斷接受客戶的訂單，
@@ -82,7 +82,7 @@ public class CoffeeShopWorker extends UntypedActor {
 假設每個CoffeeShopWorker皆能處理訂單與製作咖啡，因此在`onReceive`方法中，
 當其收到`OrderRequest`的訊息時，將會把訂單收據發送給客戶，
 並轉發製作咖啡指令給其他製作咖啡的店員。然而當收到`MakeCoffee`的訊息時，
-製作咖啡並把做好的咖發交付客戶。<br><br>
+製作咖啡並把做好的咖啡交付客戶。<br><br>
 
 ```java
 @Override
@@ -146,7 +146,7 @@ ActorSystem system = ActorSystem.create("CoffeeShop”);
 ```
 
 <br>
-接著利用system的`actorOf`來建立Actor，當中需要的參數為Acotr的設定物件`Props`，以及Actor名稱。
+接著利用system的`actorOf`來建立Actor，當中需要的參數為Actor的設定物件`Props`，以及Actor名稱。
 在建立Actor時，我們可以獲得`ActorRef`，這是Actor的參考，因為我們不能直接操作Actor實體，
 所有的操作都只能透過`ActorRef`，Actor實體是各自獨立受到保護的。<br><br>
 
@@ -165,7 +165,7 @@ system.actorOf(new RoundRobinPool(3).props(CoffeeShopWorker.props()), "workerRou
 <br>
 **傳送訊息**<br>
 
-Actor彼此之間是透過訊息來溝通，所以必須使用ActorRef來傳遞。`ActorRef`除來在建立時可以取得，
+Actor彼此之間是透過訊息來溝通，所以必須使用`ActorRef`來傳遞。`ActorRef`除來在建立時可以取得，
 也可透過`actorSelection`方法來取得，當中所需的參數為Actor的path。<br><br>
 
 ```java
@@ -196,9 +196,9 @@ public static void main(final String[] args){
 ```
 
 <br>
-**執行結果**<br><br>
+**執行結果**<br>
 
-利用輸出可以看出，客戶Actor在啟動前透過設定好的timer自動傳遞買咖啡的指令，向台接單人員購買咖啡，
+利用輸出可以看出，客戶Actor在啟動前透過設定好的timer自動傳遞買咖啡的指令，向前台接單人員購買咖啡，
 而三個咖啡製作人員則同時處裡不同客戶的訂單。 不過由於Akka內部Dispatcher配置thread機制的關係，
 我們每次執行的輸出結果的順序會有所不同。<br><br>
 
@@ -231,6 +231,6 @@ public static void main(final String[] args){
 藉由這個簡單例子的介紹，我們可以了解Akka Actor主要的特色，與Concurrent Actor Model運作的基本原理。
 但這只是個開頭，許多Akka重要的概念與細節都沒有特別介紹，主要是希望藉由這個開頭讓大家對於Akka產生興趣，
 未來將會有更多關於Akka的介紹。Akka Actor詳細資訊可參考[http://doc.akka.io/docs/akka/current/java/untyped-actors.html](http://doc.akka.io/docs/akka/current/java/untyped-actors.html)
-，上述完整程式碼請見[https://github.com/jiujye/examples/tree/master/akka-actor-example1](https://github.com/jiujye/examples/tree/master/akka-actor-example1)。
+。上述完整程式碼請見[https://github.com/jiujye/examples/tree/master/akka-actor-example1](https://github.com/jiujye/examples/tree/master/akka-actor-example1)。
 
 
