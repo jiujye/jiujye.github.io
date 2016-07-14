@@ -12,7 +12,7 @@
         <meta name="keywords" content="初探Akka Actor, Arthur, akka" />
         <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.xml">
 
-        <meta content="1749788565247320" property="fb:app_id">
+        <meta content="" property="fb:app_id">
         <meta content="Arthur" property="og:site_name">
         
           <meta content="初探Akka Actor" property="og:title">
@@ -24,10 +24,10 @@
           <meta content="" property="og:description">
         
         
-          <meta content="https://jiujye.github.io/blog/akka/2016/06/21/akka-actor-part1.html" property="og:url">
+          <meta content="https://jiujye.github.io/blog/akka/2016/07/01/akka-actor-part1.html" property="og:url">
         
         
-          <meta content="2016-06-21T04:43:45+08:00" property="article:published_time">
+          <meta content="2016-07-01T12:00:45+08:00" property="article:published_time">
           <meta content="https://jiujye.github.io/blog/about/" property="article:author">
         
         
@@ -43,13 +43,13 @@
         
 
         <meta name="twitter:card" content="summary">
-        <meta name="twitter:site" content="@agusmakmun6">
-        <meta name="twitter:creator" content="@agusmakmun6">
+        <meta name="twitter:site" content="@">
+        <meta name="twitter:creator" content="@">
         
           <meta name="twitter:title" content="初探Akka Actor">
         
         
-          <meta name="twitter:url" content="https://jiujye.github.io/blog/akka/2016/06/21/akka-actor-part1.html">
+          <meta name="twitter:url" content="https://jiujye.github.io/blog/akka/2016/07/01/akka-actor-part1.html">
         
         
           <meta name="twitter:description" content="">
@@ -133,7 +133,7 @@
 
             <div class="col-sm-9 col-offset-1">
                 <h1>初探Akka Actor</h1>
-<span class="time">21 Jun 2016</span>
+<span class="time">01 Jul 2016</span>
 
 <span class="categories">
     &raquo; <a href="/category/akka">akka</a>
@@ -141,8 +141,8 @@
 
 
 <div class="content">
-    <div class="post"><p>自從CPU從單核心發展到多核心，核心數演進飛快，從最早的雙核心發展至目前Intel提供給超級電腦使用的Xeon Phi系列61核心
-或是一般伺服器版本的24核心，然而CPU每顆核心的時脈速度卻沒有顯著的成長。對於軟體設計人員而言，已經無法單純再靠CPU時脈
+    <div class="post"><p>自從CPU從單核心發展到多核心，核心數成長飛快，由最早的雙核心發展至目前Intel提供給超級電腦使用的Xeon Phi系列61核心
+或是一般伺服器版本的24核心，不過CPU每顆核心的時脈速度卻沒有顯著的成長。對於軟體設計人員而言，已經無法單純再靠CPU時脈
 速度的成長來增進軟體的速度；我們該如何在這樣的環境中增進軟體的效能？這時Concurrency(並行)或是Parallelism(平行)的設計方式便為我們可以採取的一種手段。</p>
 
 <!--more-->
@@ -160,7 +160,7 @@ Pike認為Concurrency是同時處理(dealing with)很多事情，不同於Parall
 不少專業人士都特別針對Thread-based的Concurrency設計方式出專書介紹。</p>
 
 <p><br />
-由於傳統的方式在實作上相當的辛苦，大家開始從不同角度來思考，是否不要再透過share state來溝通。
+由於傳統的方式在實作上相當辛苦，大家開始從不同角度來思考，是否不要再透過share state來溝通。
 像是Go語言以及Akka便是採用不同於傳統主流的Concurrent運算理論來實現。<br />
 <br />
 <br />
@@ -173,8 +173,8 @@ Pike認為Concurrency是同時處理(dealing with)很多事情，不同於Parall
 Akka是利用JVM語言來實現，同時提供Java與Scala的api，而.Net的Open Source社群也實現.Net版的Akka。</p>
 
 <p><br />
-在Akka Actor中Actor為基本單元，也就是說我們主要專注於設計實現符合我們需求的Acotr；s就同如物件導向語言，
-我們專注於設計各式各樣的類別。Actor主要的特色為(以下使用原文來解釋會更容易理解)：</p>
+在Akka Actor中Actor為基本單元，也就是說我們主要專注於設計實現符合我們需求的Actor；就同如物件導向語言，
+我們專注於設計各式各樣的類別。Actor主要的特色為(以下使用原文來解釋，會更容易理解)：</p>
 
 <ul>
   <li>Isolated lightweight event-based processes</li>
@@ -188,7 +188,7 @@ Akka是利用JVM語言來實現，同時提供Java與Scala的api，而.Net的Ope
 </ul>
 
 <p><br />
-簡單的來看Acotr彼此是獨立個體，透過事件來驅動，互不分享內部資訊，只利用訊息來溝通。</p>
+簡單的來看Actor彼此是獨立個體，透過事件來驅動，互不分享內部資訊，只利用訊息來溝通。</p>
 
 <p><br />
 在真實世界中的裡充滿了Concurrency例子，譬如像是星巴克或50嵐，前台的接單人員不斷接受客戶的訂單，
@@ -219,7 +219,7 @@ Actor的實現需要透過繼承<code class="highlighter-rouge">UntypedActor</co
 假設每個CoffeeShopWorker皆能處理訂單與製作咖啡，因此在<code class="highlighter-rouge">onReceive</code>方法中，
 當其收到<code class="highlighter-rouge">OrderRequest</code>的訊息時，將會把訂單收據發送給客戶，
 並轉發製作咖啡指令給其他製作咖啡的店員。然而當收到<code class="highlighter-rouge">MakeCoffee</code>的訊息時，
-製作咖啡並把做好的咖發交付客戶。<br /><br /></p>
+製作咖啡並把做好的咖啡交付客戶。<br /><br /></p>
 
 <div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="nd">@Override</span>
 <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onReceive</span><span class="o">(</span><span class="n">Object</span> <span class="n">msg</span><span class="o">)</span> <span class="o">{</span>
@@ -282,7 +282,7 @@ Actor的實現需要透過繼承<code class="highlighter-rouge">UntypedActor</co
 </div>
 
 <p><br />
-接著利用system的<code class="highlighter-rouge">actorOf</code>來建立Actor，當中需要的參數為Acotr的設定物件<code class="highlighter-rouge">Props</code>，以及Actor名稱。
+接著利用system的<code class="highlighter-rouge">actorOf</code>來建立Actor，當中需要的參數為Actor的設定物件<code class="highlighter-rouge">Props</code>，以及Actor名稱。
 在建立Actor時，我們可以獲得<code class="highlighter-rouge">ActorRef</code>，這是Actor的參考，因為我們不能直接操作Actor實體，
 所有的操作都只能透過<code class="highlighter-rouge">ActorRef</code>，Actor實體是各自獨立受到保護的。<br /><br /></p>
 
@@ -301,7 +301,7 @@ Actor的實現需要透過繼承<code class="highlighter-rouge">UntypedActor</co
 <p><br />
 <strong>傳送訊息</strong><br /></p>
 
-<p>Actor彼此之間是透過訊息來溝通，所以必須使用ActorRef來傳遞。<code class="highlighter-rouge">ActorRef</code>除來在建立時可以取得，
+<p>Actor彼此之間是透過訊息來溝通，所以必須使用<code class="highlighter-rouge">ActorRef</code>來傳遞。<code class="highlighter-rouge">ActorRef</code>除來在建立時可以取得，
 也可透過<code class="highlighter-rouge">actorSelection</code>方法來取得，當中所需的參數為Actor的path。<br /><br /></p>
 
 <div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="n">getContext</span><span class="o">().</span><span class="na">actorSelection</span><span class="o">(</span><span class="s">"/user/Counter"</span><span class="o">).</span><span class="na">tell</span><span class="o">(</span> <span class="k">new</span> <span class="n">OrderRequest</span><span class="o">(</span><span class="n">bc</span><span class="o">.</span><span class="na">getName</span><span class="o">()),</span> <span class="n">getSelf</span><span class="o">());</span>
@@ -332,9 +332,9 @@ Actor的實現需要透過繼承<code class="highlighter-rouge">UntypedActor</co
 </div>
 
 <p><br />
-<strong>執行結果</strong><br /><br /></p>
+<strong>執行結果</strong><br /></p>
 
-<p>利用輸出可以看出，客戶Actor在啟動前透過設定好的timer自動傳遞買咖啡的指令，向台接單人員購買咖啡，
+<p>利用輸出可以看出，客戶Actor在啟動前透過設定好的timer自動傳遞買咖啡的指令，向前台接單人員購買咖啡，
 而三個咖啡製作人員則同時處裡不同客戶的訂單。 不過由於Akka內部Dispatcher配置thread機制的關係，
 我們每次執行的輸出結果的順序會有所不同。<br /><br /></p>
 
@@ -366,7 +366,9 @@ Actor的實現需要透過繼承<code class="highlighter-rouge">UntypedActor</co
 
 <p>藉由這個簡單例子的介紹，我們可以了解Akka Actor主要的特色，與Concurrent Actor Model運作的基本原理。
 但這只是個開頭，許多Akka重要的概念與細節都沒有特別介紹，主要是希望藉由這個開頭讓大家對於Akka產生興趣，
-未來將會有更多關於Akka的介紹。Akka Actor詳細資訊可參考<a href="http://doc.akka.io/docs/akka/current/java/untyped-actors.html">http://doc.akka.io/docs/akka/current/java/untyped-actors.html</a></p>
+未來將會有更多關於Akka的介紹。Akka Actor詳細資訊可參考<a href="http://doc.akka.io/docs/akka/current/java/untyped-actors.html">http://doc.akka.io/docs/akka/current/java/untyped-actors.html</a>
+。上述完整程式碼請見<a href="https://github.com/jiujye/examples/tree/master/akka-actor-example1">https://github.com/jiujye/examples/tree/master/akka-actor-example1</a>。</p>
+
 </div>
 
 </div>
@@ -378,13 +380,39 @@ Actor的實現需要透過繼承<code class="highlighter-rouge">UntypedActor</co
     
         
             
+                
+                <div class="panel-body">
+                <h4>Related Posts</h4>
+                <ul>
+                
+                <li class="relatedPost">
+                    <a href="https://jiujye.github.io/blog/akka/2016/07/14/akka-actor-part2.html">Actor運作原理</a>
+                    
+                        (Categories: <a href="/category/akka">akka</a>)
+                    
+                </li>
+                
+                
+            
+        
+    
+
+    
+    
+        
+            
         
     
 
 
+    </ul>
+    </div>
+
 -->
 <div class="PageNavigation">
   
+  
+    <a class="next" href="/akka/2016/07/14/akka-actor-part2.html">Actor運作原理 &raquo;</a>
   
 </div>
 
@@ -415,11 +443,11 @@ Actor的實現需要透過繼承<code class="highlighter-rouge">UntypedActor</co
                      
                     - <a href="https://github.com/jiujye">https://github.com/jiujye</a> - Powered by Jekyll.
                     
-
+<!--
                     <div class="btn-github" style="float:right;">
                         <iframe src="https://ghbtns.com/github-btn.html?user=jiujye&repo=jiujye.github.io&type=star&count=true" frameborder="0" scrolling="0" width="85" height="20px"></iframe>                    
                         <iframe src="https://ghbtns.com/github-btn.html?user=jiujye&repo=jiujye.github.io&type=fork&count=true" frameborder="0" scrolling="0" width="85" height="20px"></iframe>
-                    </div>
+                    </div>-->
                 </footer>
             </div><!-- end /.col-sm-8 -->
         </div><!-- end /.container -->

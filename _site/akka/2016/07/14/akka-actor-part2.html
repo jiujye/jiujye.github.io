@@ -6,16 +6,16 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <link rel="shortcut icon" href="/static/img/favicon.ico" />
-        <title>Python - Arthur</title>
+        <title>Actor運作原理 - Arthur</title>
         <meta name="author" content="Arthur Wu" />
-        <meta name="description" content="Python" />
-        <meta name="keywords" content="Python, Arthur, python" />
+        <meta name="description" content="Actor運作原理" />
+        <meta name="keywords" content="Actor運作原理, Arthur, akka" />
         <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.xml">
 
         <meta content="" property="fb:app_id">
         <meta content="Arthur" property="og:site_name">
         
-          <meta content="Python" property="og:title">
+          <meta content="Actor運作原理" property="og:title">
         
         
           <meta content="article" property="og:type">
@@ -24,27 +24,32 @@
           <meta content="" property="og:description">
         
         
-          <meta content="https://jiujye.github.io/blog/category/python" property="og:url">
+          <meta content="https://jiujye.github.io/blog/akka/2016/07/14/akka-actor-part2.html" property="og:url">
         
+        
+          <meta content="2016-07-14T10:00:45+08:00" property="article:published_time">
+          <meta content="https://jiujye.github.io/blog/about/" property="article:author">
         
         
           <meta content="https://jiujye.github.io/blog/static/img/logo-high-resolution.png" property="og:image">
         
         
           
-          <meta content="python" property="article:section">
+          <meta content="akka" property="article:section">
           
         
+        
+          
         
 
         <meta name="twitter:card" content="summary">
         <meta name="twitter:site" content="@">
         <meta name="twitter:creator" content="@">
         
-          <meta name="twitter:title" content="Python">
+          <meta name="twitter:title" content="Actor運作原理">
         
         
-          <meta name="twitter:url" content="https://jiujye.github.io/blog/category/python">
+          <meta name="twitter:url" content="https://jiujye.github.io/blog/akka/2016/07/14/akka-actor-part2.html">
         
         
           <meta name="twitter:description" content="">
@@ -127,26 +132,129 @@
             </div>
 
             <div class="col-sm-9 col-offset-1">
-                <header id="post-header">
-    <h1 id="post-subtitle">Articles by category: python</h1>
-</header>
+                <h1>Actor運作原理</h1>
+<span class="time">14 Jul 2016</span>
 
-<div id="post-content">
-    <hr />
-    
-        
-        
-            
-                <a href="/category/akka" class="btn btn-sm btn-default">akka</a>
-            
-        
-    
-    <hr />
+<span class="categories">
+    &raquo; <a href="/category/akka">akka</a>
+</span>
 
-    
-        <p>There are no posts in this categories.</p>
-    
+
+<div class="content">
+    <div class="post"><p>透過Akka創作者Jonas Bonér於研討會中對於Actor的講解，
+讓我們可以快速理解Actor的運作方式。以下為的Bonér的演講內容
+(5分55秒到9分12秒為解釋Actor的部分)。</p>
+
+<!--more-->
+<p><br /></p>
+
+<iframe width="500" height="315" src="https://www.youtube.com/embed/UY3fuHebRMI?start=355" frameborder="0" allowfullscreen=""></iframe>
+
+<p><br />
+在這將近4分鐘的內容中，Bonér利用投影片清楚而簡單的說明了Actor的基本原理。</p>
+
+<p><br />
+經由影片中的投影片，我們可以了解每個Actor有其本身的狀態與行為，
+如同物件導向的物件一樣，不過每個Actor都有其各自的Mailbox。
+Actor彼此不分享其內部的狀態與行為，只透過訊息來溝通，
+而訊息傳遞至各自的Mailbox中，Actor一次只處理一個訊息。</p>
+
+<p><br />
+Actor可以是thread-based，不過大部分的Actor System是採用event-based的機制，
+也就是說Actor是運行在event-based的thread上。Actor System透過內部的排程器將Actor從pool中取出，
+運行在thread pool中的某個thread上，當其時間到了，
+Actor System會將其放回pool中，而其他Actor可以繼續運行在該thread。</p>
+
+<p><br />
+以上為Bonér對於Actor運作方式的一般性說明。
+至於在Akka中專門負責讓Actor運作的角色為<code class="highlighter-rouge">MessageDispatcher</code>，
+Akka有三種類型的MessageDispatcher，分別為<code class="highlighter-rouge">Dispatcher</code>，<code class="highlighter-rouge">PinnedDispatcher</code>與<code class="highlighter-rouge">BalancingDispatcher</code>，以下為簡單的說明。
+<br /></p>
+
+<ul>
+  <li>
+    <p>Dispatcher：預設的MessageDispatcher，運作的方式如同上述，是採用event-based的機制，
+背後採用了Java的ExecutorService。</p>
+  </li>
+  <li>
+    <p>PinnedDispatcher：當你不想讓Actor共用thread時，採用PinnedDispatcher會配置給每個Actor獨一無二的thread。</p>
+  </li>
+  <li>
+    <p>BalancingDispatcher：在BalancingDispatcher下，所有的Actor會共用一個Mailbox，此Dispatcher將會確保訊息交由閒置的Actor來處理。</p>
+  </li>
+</ul>
+
+<p><br />
+<strong>詳細的資料可參考</strong> <a href="http://doc.akka.io/docs/akka/2.4/scala/dispatchers.html">Akka Dispatcher</a></p>
+
 </div>
+
+</div>
+
+<!--
+
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+                
+                <div class="panel-body">
+                <h4>Related Posts</h4>
+                <ul>
+                
+                <li class="relatedPost">
+                    <a href="https://jiujye.github.io/blog/akka/2016/07/01/akka-actor-part1.html">初探Akka Actor</a>
+                    
+                        (Categories: <a href="/category/akka">akka</a>)
+                    
+                </li>
+                
+                
+            
+        
+    
+
+
+    </ul>
+    </div>
+
+-->
+<div class="PageNavigation">
+  
+    <a class="prev" href="/akka/2016/07/01/akka-actor-part1.html">&laquo; 初探Akka Actor</a>
+  
+  
+</div>
+
+<!--
+<div class="disqus-comments">
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* <![CDATA[ */
+
+        var disqus_shortname = "";
+        var disqus_identifier = "https://jiujye.github.io/blog_Actor運作原理";
+        var disqus_title = "Actor運作原理";
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    /* ]]> */
+    </script>
+</div>
+-->
+
 
                 <footer>
                     &copy; Arthur Wu

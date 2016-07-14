@@ -5,14 +5,72 @@
     <description></description>
     <link>https://jiujye.github.io/blog/</link>
     <atom:link href="https://jiujye.github.io/blog/sitemap.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Fri, 01 Jul 2016 10:36:01 +0800</pubDate>
-    <lastBuildDate>Fri, 01 Jul 2016 10:36:01 +0800</lastBuildDate>
+    <pubDate>Thu, 14 Jul 2016 11:11:17 +0800</pubDate>
+    <lastBuildDate>Thu, 14 Jul 2016 11:11:17 +0800</lastBuildDate>
     <generator>Jekyll v3.1.6</generator>
     
       <item>
+        <title>Actor運作原理</title>
+        <description>&lt;p&gt;透過Akka創作者Jonas Bonér於研討會中對於Actor的講解，
+讓我們可以快速理解Actor的運作方式。以下為的Bonér的演講內容
+(5分55秒到9分12秒為解釋Actor的部分)。&lt;/p&gt;
+
+&lt;!--more--&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;iframe width=&quot;500&quot; height=&quot;315&quot; src=&quot;https://www.youtube.com/embed/UY3fuHebRMI?start=355&quot; frameborder=&quot;0&quot; allowfullscreen=&quot;&quot;&gt;&lt;/iframe&gt;
+
+&lt;p&gt;&lt;br /&gt;
+在這將近4分鐘的內容中，Bonér利用投影片清楚而簡單的說明了Actor的基本原理。&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;
+經由影片中的投影片，我們可以了解每個Actor有其本身的狀態與行為，
+如同物件導向的物件一樣，不過每個Actor都有其各自的Mailbox。
+Actor彼此不分享其內部的狀態與行為，只透過訊息來溝通，
+而訊息傳遞至各自的Mailbox中，Actor一次只處理一個訊息。&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;
+Actor可以是thread-based，不過大部分的Actor System是採用event-based的機制，
+也就是說Actor是運行在event-based的thread上。Actor System透過內部的排程器將Actor從pool中取出，
+運行在thread pool中的某個thread上，當其時間到了，
+Actor System會將其放回pool中，而其他Actor可以繼續運行在該thread。&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;
+以上為Bonér對於Actor運作方式的一般性說明。
+至於在Akka中專門負責讓Actor運作的角色為&lt;code class=&quot;highlighter-rouge&quot;&gt;MessageDispatcher&lt;/code&gt;，
+Akka有三種類型的MessageDispatcher，分別為&lt;code class=&quot;highlighter-rouge&quot;&gt;Dispatcher&lt;/code&gt;，&lt;code class=&quot;highlighter-rouge&quot;&gt;PinnedDispatcher&lt;/code&gt;與&lt;code class=&quot;highlighter-rouge&quot;&gt;BalancingDispatcher&lt;/code&gt;，以下為簡單的說明。
+&lt;br /&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;Dispatcher：預設的MessageDispatcher，運作的方式如同上述，是採用event-based的機制，
+背後採用了Java的ExecutorService。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;PinnedDispatcher：當你不想讓Actor共用thread時，採用PinnedDispatcher會配置給每個Actor獨一無二的thread。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;BalancingDispatcher：在BalancingDispatcher下，所有的Actor會共用一個Mailbox，此Dispatcher將會確保訊息交由閒置的Actor來處理。&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;br /&gt;
+&lt;strong&gt;詳細的資料可參考&lt;/strong&gt; &lt;a href=&quot;http://doc.akka.io/docs/akka/2.4/scala/dispatchers.html&quot;&gt;Akka Dispatcher&lt;/a&gt;&lt;/p&gt;
+
+</description>
+        <pubDate>Thu, 14 Jul 2016 10:00:45 +0800</pubDate>
+        <link>https://jiujye.github.io/blog/akka/2016/07/14/akka-actor-part2.html</link>
+        <guid isPermaLink="true">https://jiujye.github.io/blog/akka/2016/07/14/akka-actor-part2.html</guid>
+        
+        
+        <category>akka</category>
+        
+      </item>
+    
+      <item>
         <title>初探Akka Actor</title>
-        <description>&lt;p&gt;自從CPU從單核心發展到多核心，核心數演進飛快，從最早的雙核心發展至目前Intel提供給超級電腦使用的Xeon Phi系列61核心
-或是一般伺服器版本的24核心，然而CPU每顆核心的時脈速度卻沒有顯著的成長。對於軟體設計人員而言，已經無法單純再靠CPU時脈
+        <description>&lt;p&gt;自從CPU從單核心發展到多核心，核心數成長飛快，由最早的雙核心發展至目前Intel提供給超級電腦使用的Xeon Phi系列61核心
+或是一般伺服器版本的24核心，不過CPU每顆核心的時脈速度卻沒有顯著的成長。對於軟體設計人員而言，已經無法單純再靠CPU時脈
 速度的成長來增進軟體的速度；我們該如何在這樣的環境中增進軟體的效能？這時Concurrency(並行)或是Parallelism(平行)的設計方式便為我們可以採取的一種手段。&lt;/p&gt;
 
 &lt;!--more--&gt;
@@ -30,7 +88,7 @@ Pike認為Concurrency是同時處理(dealing with)很多事情，不同於Parall
 不少專業人士都特別針對Thread-based的Concurrency設計方式出專書介紹。&lt;/p&gt;
 
 &lt;p&gt;&lt;br /&gt;
-由於傳統的方式在實作上相當的辛苦，大家開始從不同角度來思考，是否不要再透過share state來溝通。
+由於傳統的方式在實作上相當辛苦，大家開始從不同角度來思考，是否不要再透過share state來溝通。
 像是Go語言以及Akka便是採用不同於傳統主流的Concurrent運算理論來實現。&lt;br /&gt;
 &lt;br /&gt;
 &lt;br /&gt;
@@ -43,8 +101,8 @@ Pike認為Concurrency是同時處理(dealing with)很多事情，不同於Parall
 Akka是利用JVM語言來實現，同時提供Java與Scala的api，而.Net的Open Source社群也實現.Net版的Akka。&lt;/p&gt;
 
 &lt;p&gt;&lt;br /&gt;
-在Akka Actor中Actor為基本單元，也就是說我們主要專注於設計實現符合我們需求的Acotr；s就同如物件導向語言，
-我們專注於設計各式各樣的類別。Actor主要的特色為(以下使用原文來解釋會更容易理解)：&lt;/p&gt;
+在Akka Actor中Actor為基本單元，也就是說我們主要專注於設計實現符合我們需求的Actor；就同如物件導向語言，
+我們專注於設計各式各樣的類別。Actor主要的特色為(以下使用原文來解釋，會更容易理解)：&lt;/p&gt;
 
 &lt;ul&gt;
   &lt;li&gt;Isolated lightweight event-based processes&lt;/li&gt;
@@ -58,7 +116,7 @@ Akka是利用JVM語言來實現，同時提供Java與Scala的api，而.Net的Ope
 &lt;/ul&gt;
 
 &lt;p&gt;&lt;br /&gt;
-簡單的來看Acotr彼此是獨立個體，透過事件來驅動，互不分享內部資訊，只利用訊息來溝通。&lt;/p&gt;
+簡單的來看Actor彼此是獨立個體，透過事件來驅動，互不分享內部資訊，只利用訊息來溝通。&lt;/p&gt;
 
 &lt;p&gt;&lt;br /&gt;
 在真實世界中的裡充滿了Concurrency例子，譬如像是星巴克或50嵐，前台的接單人員不斷接受客戶的訂單，
@@ -89,7 +147,7 @@ Actor的實現需要透過繼承&lt;code class=&quot;highlighter-rouge&quot;&gt;
 假設每個CoffeeShopWorker皆能處理訂單與製作咖啡，因此在&lt;code class=&quot;highlighter-rouge&quot;&gt;onReceive&lt;/code&gt;方法中，
 當其收到&lt;code class=&quot;highlighter-rouge&quot;&gt;OrderRequest&lt;/code&gt;的訊息時，將會把訂單收據發送給客戶，
 並轉發製作咖啡指令給其他製作咖啡的店員。然而當收到&lt;code class=&quot;highlighter-rouge&quot;&gt;MakeCoffee&lt;/code&gt;的訊息時，
-製作咖啡並把做好的咖發交付客戶。&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
+製作咖啡並把做好的咖啡交付客戶。&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 
 &lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nd&quot;&gt;@Override&lt;/span&gt;
 &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;onReceive&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Object&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
@@ -152,7 +210,7 @@ Actor的實現需要透過繼承&lt;code class=&quot;highlighter-rouge&quot;&gt;
 &lt;/div&gt;
 
 &lt;p&gt;&lt;br /&gt;
-接著利用system的&lt;code class=&quot;highlighter-rouge&quot;&gt;actorOf&lt;/code&gt;來建立Actor，當中需要的參數為Acotr的設定物件&lt;code class=&quot;highlighter-rouge&quot;&gt;Props&lt;/code&gt;，以及Actor名稱。
+接著利用system的&lt;code class=&quot;highlighter-rouge&quot;&gt;actorOf&lt;/code&gt;來建立Actor，當中需要的參數為Actor的設定物件&lt;code class=&quot;highlighter-rouge&quot;&gt;Props&lt;/code&gt;，以及Actor名稱。
 在建立Actor時，我們可以獲得&lt;code class=&quot;highlighter-rouge&quot;&gt;ActorRef&lt;/code&gt;，這是Actor的參考，因為我們不能直接操作Actor實體，
 所有的操作都只能透過&lt;code class=&quot;highlighter-rouge&quot;&gt;ActorRef&lt;/code&gt;，Actor實體是各自獨立受到保護的。&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 
@@ -171,7 +229,7 @@ Actor的實現需要透過繼承&lt;code class=&quot;highlighter-rouge&quot;&gt;
 &lt;p&gt;&lt;br /&gt;
 &lt;strong&gt;傳送訊息&lt;/strong&gt;&lt;br /&gt;&lt;/p&gt;
 
-&lt;p&gt;Actor彼此之間是透過訊息來溝通，所以必須使用ActorRef來傳遞。&lt;code class=&quot;highlighter-rouge&quot;&gt;ActorRef&lt;/code&gt;除來在建立時可以取得，
+&lt;p&gt;Actor彼此之間是透過訊息來溝通，所以必須使用&lt;code class=&quot;highlighter-rouge&quot;&gt;ActorRef&lt;/code&gt;來傳遞。&lt;code class=&quot;highlighter-rouge&quot;&gt;ActorRef&lt;/code&gt;除來在建立時可以取得，
 也可透過&lt;code class=&quot;highlighter-rouge&quot;&gt;actorSelection&lt;/code&gt;方法來取得，當中所需的參數為Actor的path。&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 
 &lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;getContext&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;actorSelection&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/user/Counter&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;tell&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;OrderRequest&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;bc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getName&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;getSelf&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;());&lt;/span&gt;
@@ -202,9 +260,9 @@ Actor的實現需要透過繼承&lt;code class=&quot;highlighter-rouge&quot;&gt;
 &lt;/div&gt;
 
 &lt;p&gt;&lt;br /&gt;
-&lt;strong&gt;執行結果&lt;/strong&gt;&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;strong&gt;執行結果&lt;/strong&gt;&lt;br /&gt;&lt;/p&gt;
 
-&lt;p&gt;利用輸出可以看出，客戶Actor在啟動前透過設定好的timer自動傳遞買咖啡的指令，向台接單人員購買咖啡，
+&lt;p&gt;利用輸出可以看出，客戶Actor在啟動前透過設定好的timer自動傳遞買咖啡的指令，向前台接單人員購買咖啡，
 而三個咖啡製作人員則同時處裡不同客戶的訂單。 不過由於Akka內部Dispatcher配置thread機制的關係，
 我們每次執行的輸出結果的順序會有所不同。&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 
@@ -236,11 +294,13 @@ Actor的實現需要透過繼承&lt;code class=&quot;highlighter-rouge&quot;&gt;
 
 &lt;p&gt;藉由這個簡單例子的介紹，我們可以了解Akka Actor主要的特色，與Concurrent Actor Model運作的基本原理。
 但這只是個開頭，許多Akka重要的概念與細節都沒有特別介紹，主要是希望藉由這個開頭讓大家對於Akka產生興趣，
-未來將會有更多關於Akka的介紹。Akka Actor詳細資訊可參考&lt;a href=&quot;http://doc.akka.io/docs/akka/current/java/untyped-actors.html&quot;&gt;http://doc.akka.io/docs/akka/current/java/untyped-actors.html&lt;/a&gt;&lt;/p&gt;
+未來將會有更多關於Akka的介紹。Akka Actor詳細資訊可參考&lt;a href=&quot;http://doc.akka.io/docs/akka/current/java/untyped-actors.html&quot;&gt;http://doc.akka.io/docs/akka/current/java/untyped-actors.html&lt;/a&gt;
+。上述完整程式碼請見&lt;a href=&quot;https://github.com/jiujye/examples/tree/master/akka-actor-example1&quot;&gt;https://github.com/jiujye/examples/tree/master/akka-actor-example1&lt;/a&gt;。&lt;/p&gt;
+
 </description>
-        <pubDate>Tue, 21 Jun 2016 04:43:45 +0800</pubDate>
-        <link>https://jiujye.github.io/blog/akka/2016/06/21/akka-actor-part1.html</link>
-        <guid isPermaLink="true">https://jiujye.github.io/blog/akka/2016/06/21/akka-actor-part1.html</guid>
+        <pubDate>Fri, 01 Jul 2016 12:00:45 +0800</pubDate>
+        <link>https://jiujye.github.io/blog/akka/2016/07/01/akka-actor-part1.html</link>
+        <guid isPermaLink="true">https://jiujye.github.io/blog/akka/2016/07/01/akka-actor-part1.html</guid>
         
         
         <category>akka</category>
